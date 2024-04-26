@@ -18,7 +18,7 @@ model Menu {
   id           String     @id @default(cuid())
   title        String
   description  String?
-  restarurant  Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
   restaurantId String
   Products     Products[]
 
