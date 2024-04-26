@@ -26,12 +26,12 @@ model Menu {
 }
 
 model Products {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
-  description String?
-  section     String
-  price       Float   @default(1)
-  menu        Menu    @relation(fields: [menuId], references: [id])
+  description String?  @default("")
+  section     String?  @default("")
+  price       Float
+  menu        Menu     @relation(fields: [menuId], references: [id])
   menuId      String
-  published   Boolean @default(true)
+  published   Boolean? @default(true)
 }
