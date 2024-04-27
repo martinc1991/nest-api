@@ -26,10 +26,6 @@ describe('ProductsService', () => {
     service = module.get<ProductsService>(ProductsService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   it('create method should call prisma.product.create with expected arguments', async () => {
     await service.create(createProductStub);
 

@@ -25,10 +25,6 @@ describe('RestaurantsService', () => {
     service = module.get<RestaurantsService>(RestaurantsService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   it('create method should call prisma.restaurants.create with expected arguments', async () => {
     await service.create(createRestaurantStub);
 
