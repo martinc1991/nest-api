@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateProductDto implements Prisma.ProductsCreateWithoutMenuInput {
+export class CreateProductDto implements Prisma.ProductCreateWithoutMenuInput {
   @IsString()
   @IsNotEmpty()
   title: string;
