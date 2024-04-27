@@ -20,12 +20,12 @@ model Menu {
   description  String?
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
   restaurantId String
-  Products     Products[]
+  Products     Product[]
 
   @@unique([title, restaurantId])
 }
 
-model Products {
+model Product {
   id          String   @id @default(cuid())
   title       String
   description String?  @default("")
