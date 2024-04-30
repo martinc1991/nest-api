@@ -14,7 +14,7 @@ export class AuthService {
     private usersService: UsersService,
   ) {}
 
-  async signup(dto: AuthDto): Promise<Tokens> {
+  async signup(dto: AuthDto) {
     const user = await this.usersService.createUser(dto.email, dto.password);
 
     const tokens = await this.getTokens(user.id, user.email);
@@ -24,12 +24,12 @@ export class AuthService {
   }
 
   async signin({ id, email }: { id: string; email: string }) {
-    const u = await this.usersService.findOneByEmail(email);
+    const user = await this.usersService.findOneByEmail(email);
 
     const tokens = await this.getTokens(id, email);
     await this.updateRefreshToken(id, tokens.refresh_token);
 
-    return { ...u, ...tokens };
+    return { ...user, ...tokens };
   }
 
   async signout(userId: string) {
