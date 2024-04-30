@@ -2,12 +2,14 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { JwtStrategyUser } from 'src/auth/common/decorators';
 import { JwtAuthGuard } from 'src/auth/common/guards';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
@@ -29,8 +31,18 @@ export class RestaurantsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createRestaurantDto: CreateRestaurantDto) {
-    return this.restaurantsService.create(createRestaurantDto);
+  async create(
+    @Body() createRestaurantDto: CreateRestaurantDto,
+    @JwtStrategyUser() user: JwtStrategyUser,
+  ) {
+    const existingRestaurant = await this.restaurantsService.findOneByOwner(
+      user.id,
+    );
+
+    if (existingRestaurant)
+      throw new ForbiddenException('User already have a restaurant');
+
+    return this.restaurantsService.create(createRestaurantDto, user.id);
   }
 
   @UseGuards(JwtAuthGuard)
