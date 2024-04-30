@@ -7,11 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id String @id @default(cuid())
+
+  email        String  @unique
+  password     String
+  refreshToken String?
+
+  // TODO: add this later (and restaurant should be optional, first we create a user, the we assign it to a restaurant)
+  // restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  // restaurantId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Restaurant {
   id    String @id @default(cuid())
   email String @unique
   name  String @unique
+
   menus Menu[]
+
+  // TODO: add this later
+  // users User[]
 }
 
 model Menu {
