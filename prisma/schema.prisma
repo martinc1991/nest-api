@@ -14,34 +14,39 @@ model User {
   password     String
   refreshToken String?
 
-  // TODO: add this later (and restaurant should be optional, first we create a user, the we assign it to a restaurant)
-  // restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
-  // restaurantId String
+  restaurant Restaurant?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Restaurant {
-  id    String @id @default(cuid())
-  email String @unique
-  name  String @unique
+  id String @id @default(cuid())
 
-  menus Menu[]
+  name String
 
-  // TODO: add this later
-  // users User[]
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String @unique
+
+  menu Menu?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Menu {
-  id           String     @id @default(cuid())
-  title        String
-  description  String?
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
-  restaurantId String
-  Products     Product[]
+  id String @id @default(cuid())
 
-  @@unique([title, restaurantId])
+  title       String
+  description String?
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId String     @unique
+
+  Products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Product {
@@ -53,4 +58,8 @@ model Product {
   menu        Menu     @relation(fields: [menuId], references: [id])
   menuId      String
   published   Boolean? @default(true)
+  available   Boolean? @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

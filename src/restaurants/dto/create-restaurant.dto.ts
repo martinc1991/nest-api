@@ -1,10 +1,6 @@
-import { Prisma } from '@prisma/client';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateRestaurantDto implements Prisma.RestaurantCreateInput {
-  @IsEmail()
-  email: string;
-
+export class CreateRestaurantDto {
   @IsString()
   @IsNotEmpty()
   name: string;

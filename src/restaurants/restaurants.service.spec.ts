@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaClient } from '@prisma/client';
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
+import { jwtTokenStub } from 'src/auth/stub/jwt-token.stub';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RestaurantsService } from './restaurants.service';
 import { createRestaurantStub } from './stub/create-restaurant.stub';
@@ -26,9 +27,18 @@ describe('RestaurantsService', () => {
   });
 
   it('create method should call prisma.restaurants.create with expected arguments', async () => {
-    await service.create(createRestaurantStub);
+    await service.create(createRestaurantStub, jwtTokenStub.id);
 
-    const expectedArguments = { data: createRestaurantStub };
+    const expectedArguments = {
+      data: {
+        name: createRestaurantStub.name,
+        owner: {
+          connect: {
+            id: jwtTokenStub.id,
+          },
+        },
+      },
+    };
 
     expect(prismaMock.restaurant.create).toHaveBeenCalledWith(
       expectedArguments,
@@ -39,14 +49,25 @@ describe('RestaurantsService', () => {
 
     expect(prismaMock.restaurant.findMany).toHaveBeenCalled();
   });
-  it('findOne method should call prisma.restaurants.findUniqueOrThrow with expected arguments', async () => {
+  it('findOne method should call prisma.restaurants.findUnique with expected arguments', async () => {
     const id = 'some-id';
 
     await service.findOne(id);
 
     const expectedArguments = { where: { id } };
 
-    expect(prismaMock.restaurant.findUniqueOrThrow).toHaveBeenCalledWith(
+    expect(prismaMock.restaurant.findUnique).toHaveBeenCalledWith(
+      expectedArguments,
+    );
+  });
+  it('findOneByOwner method should call prisma.restaurants.findUnique with expected arguments', async () => {
+    const id = 'some-id';
+
+    await service.findOneByOwner(id);
+
+    const expectedArguments = { where: { ownerId: id } };
+
+    expect(prismaMock.restaurant.findUnique).toHaveBeenCalledWith(
       expectedArguments,
     );
   });

@@ -2,12 +2,15 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { JwtStrategyUser } from 'src/auth/common/decorators';
 import { JwtAuthGuard } from 'src/auth/common/guards';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
@@ -23,14 +26,28 @@ export class RestaurantsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.restaurantsService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const restaurant = await this.restaurantsService.findOne(id);
+
+    if (!restaurant) throw new NotFoundException('Restaurant not found');
+
+    return restaurant;
   }
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createRestaurantDto: CreateRestaurantDto) {
-    return this.restaurantsService.create(createRestaurantDto);
+  async create(
+    @Body() createRestaurantDto: CreateRestaurantDto,
+    @JwtStrategyUser() user: JwtStrategyUser,
+  ) {
+    const existingRestaurant = await this.restaurantsService.findOneByOwner(
+      user.id,
+    );
+
+    if (existingRestaurant)
+      throw new ForbiddenException('User already have a restaurant');
+
+    return this.restaurantsService.create(createRestaurantDto, user.id);
   }
 
   @UseGuards(JwtAuthGuard)
