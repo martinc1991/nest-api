@@ -4,6 +4,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -25,8 +26,12 @@ export class RestaurantsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.restaurantsService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const restaurant = await this.restaurantsService.findOne(id);
+
+    if (!restaurant) throw new NotFoundException('Restaurant not found');
+
+    return restaurant;
   }
 
   @UseGuards(JwtAuthGuard)

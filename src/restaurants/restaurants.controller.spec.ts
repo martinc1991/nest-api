@@ -16,6 +16,8 @@ describe('RestaurantsController', () => {
   const id = 'some-id';
 
   beforeEach(async () => {
+    jest.resetAllMocks();
+
     prismaMock = mockDeep<PrismaClient>();
     serviceMock = mockDeep<RestaurantsService>();
 
@@ -43,7 +45,7 @@ describe('RestaurantsController', () => {
     try {
       await controller.create(createRestaurantStub, jwtTokenStub);
     } catch (error) {
-      expect(error.response.message).toMatch('User already have a restaurant');
+      expect(error.response.message).toBe('User already have a restaurant');
     }
   });
   it('create handler should call create service method with expected arguments', async () => {
@@ -58,8 +60,23 @@ describe('RestaurantsController', () => {
     expect(serviceMock.findAll).toHaveBeenCalledWith();
   });
   it('findOne handler should call findOne service method with expected arguments', async () => {
+    const spy = jest.spyOn(serviceMock, 'findOne');
+    spy.mockResolvedValueOnce(restaurantStub);
+
     await controller.findOne(id);
     expect(serviceMock.findOne).toHaveBeenCalledWith(id);
+  });
+  it('findOne handler should throw an error if restaurant not found', async () => {
+    const spy = jest.spyOn(serviceMock, 'findOne');
+    spy.mockResolvedValueOnce(null);
+
+    expect.assertions(1);
+
+    try {
+      await controller.findOne(id);
+    } catch (error) {
+      expect(error.response.message).toBe('Restaurant not found');
+    }
   });
   it('update handler should call update service method with expected arguments', async () => {
     await controller.update(id, createRestaurantStub);
