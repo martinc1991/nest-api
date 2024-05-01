@@ -20,7 +20,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "docker compose up e2e-test-db -d --force-recreate && dotenv -e .env.test -- pnpm prisma migrate reset --force && dotenv -e .env.test -- jest --config ./jest-e2e.config.ts && docker compose down e2e-test-db",
+    "test:e2e": "docker compose up e2e-test-db -d && dotenv -e .env.test -- pnpm prisma migrate reset --force && dotenv -e .env.test -- jest --config ./jest-e2e.config.ts && docker compose stop e2e-test-db",
     "test:e2e:watch": "docker compose up e2e-test-db -d && dotenv -e .env.test -- pnpm prisma generate && dotenv -e .env.test -- pnpm prisma db push && dotenv -e .env.test -- jest --watch --config ./jest-e2e.config.ts"
   },
   "dependencies": {
