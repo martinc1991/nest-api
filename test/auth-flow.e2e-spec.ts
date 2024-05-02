@@ -36,28 +36,29 @@ describe('Auth flow', () => {
     prisma = moduleFixture.get<PrismaService>(PrismaService);
   });
 
-  describe('User signup', () => {
-    let signUpEndpoint: request.Test;
-
+  describe.only('User signup', () => {
     beforeEach(async () => {
-      signUpEndpoint = request(app.getHttpServer()).post(SIGNUP_ROUTE);
       await prisma.user.deleteMany();
     });
 
     it('A user should not be able to sign up, if invalid email is provided', async () => {
-      const { status, body } = await signUpEndpoint.send({
-        ...userOne,
-        email: invalidUser.email,
-      });
+      const { status, body } = await request(app.getHttpServer())
+        .post(SIGNUP_ROUTE)
+        .send({
+          ...userOne,
+          email: invalidUser.email,
+        });
 
       expect(status).toBe(400);
       expect(body.response.message).toContain('Email must be a valid email');
     });
     it('A user should not be able to sign up, if invalid password is provided', async () => {
-      const { status, body } = await signUpEndpoint.send({
-        ...userOne,
-        password: invalidUser.password,
-      });
+      const { status, body } = await request(app.getHttpServer())
+        .post(SIGNUP_ROUTE)
+        .send({
+          ...userOne,
+          password: invalidUser.password,
+        });
 
       expect(status).toBe(400);
       expect(body.response.message).toContain(
@@ -65,17 +66,26 @@ describe('Auth flow', () => {
       );
     });
     it('A user should be able to sign up, if valid email and password are provided', async () => {
-      const { status } = await signUpEndpoint.send(userOne);
+      const { status } = await request(app.getHttpServer())
+        .post(SIGNUP_ROUTE)
+        .send(userOne);
 
       expect(status).toBe(201);
     });
-    it('A user should not be able to sign up if email is already taken', async () => {
-      const user = await signUpEndpoint.send(userOne);
+    it.only('A user should not be able to sign up if email is already taken', async () => {
+      const user = await request(app.getHttpServer())
+        .post(SIGNUP_ROUTE)
+        .send(userOne);
       expect(user.status).toBe(201);
 
-      const alreadyTakenUser = await signUpEndpoint.send(userOne);
+      const alreadyTakenUser = await request(app.getHttpServer())
+        .post(SIGNUP_ROUTE)
+        .send(userOne);
 
       expect(alreadyTakenUser.status).toBe(409);
+      expect(alreadyTakenUser.body.response.message).toContain(
+        'Email already taken',
+      );
     });
   });
 

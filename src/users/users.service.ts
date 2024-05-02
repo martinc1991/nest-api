@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -18,14 +19,22 @@ export class UsersService {
   async createUser(email: string, password: string) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-      },
-    });
-
-    return user;
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+        },
+      });
+      return user;
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Email already taken');
+        }
+      }
+      throw error;
+    }
   }
 
   async updateUser(id: string, data: Partial<User>) {
