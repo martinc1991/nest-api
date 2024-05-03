@@ -10,7 +10,7 @@ import {
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
 } from '@prisma/client/runtime/library';
-import { getPrismaErrorStatusCode } from 'lib/prisma';
+import { getPrismaErrorStatusCode } from 'src/lib/prisma';
 
 type ErrorRes = {
   statusCode: number;
@@ -19,6 +19,7 @@ type ErrorRes = {
   response: string | object;
 };
 
+// TODO: serialize errors
 @Catch()
 export class AllExceptionsFilter extends BaseExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {

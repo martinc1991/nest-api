@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
-import { MenusService } from './menus.service';
+import { PrismaModule } from 'src/prisma/prisma.module';
 import { MenusController } from './menus.controller';
+import { MenusService } from './menus.service';
 
 @Module({
+  imports: [PrismaModule],
   controllers: [MenusController],
   providers: [MenusService],
 })

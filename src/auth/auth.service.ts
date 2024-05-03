@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { CryptoService } from 'src/crypto/crypto.service';
 import { UsersService } from 'src/users/users.service';
 import { AuthDto } from './dto';
 import { Tokens } from './types';
@@ -12,6 +12,7 @@ export class AuthService {
   constructor(
     private jwt: JwtService,
     private usersService: UsersService,
+    private cryptoService: CryptoService,
   ) {}
 
   async signup(dto: AuthDto) {
@@ -61,10 +62,6 @@ export class AuthService {
   // }
 
   // ------------------------- Utils -------------------------
-  hashData(data: string) {
-    return bcrypt.hash(data, 10);
-  }
-
   async getTokens(userId: string, email: string): Promise<Tokens> {
     const userJwtInfo: JWTUserInfo = { id: userId, email };
 
@@ -80,7 +77,10 @@ export class AuthService {
 
     if (!user) return null;
 
-    const passwordMatches = await bcrypt.compare(password, user.password);
+    const passwordMatches = await this.cryptoService.compare({
+      hashedPassword: user.password,
+      password,
+    });
 
     if (!passwordMatches) return null;
 
@@ -88,7 +88,7 @@ export class AuthService {
   }
 
   async updateRefreshToken(userId: string, refreshToken: string) {
-    const hashedRefreshToken = await this.hashData(refreshToken);
+    const hashedRefreshToken = await this.cryptoService.hash(refreshToken);
 
     await this.usersService.updateUser(userId, {
       refreshToken: hashedRefreshToken,

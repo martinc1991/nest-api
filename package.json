@@ -8,7 +8,9 @@
   "scripts": {
     "build": "nest build",
     "start": "nest start",
-    "dev": "docker compose up dev-db -d && pnpm prisma db push && nest start --watch",
+    "predev": "docker compose up dev-db -d && pnpm prisma db push",
+    "dev": "nest start --watch",
+    "postdev": "docker compose stop dev-db",
     "debug": "docker compose up dev-db -d && nest start --debug --watch",
     "start:prod": "node dist/main",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -19,7 +21,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "docker compose up e2e-test-db -d && dotenv -e .env.test -- pnpm prisma generate && dotenv -e .env.test -- pnpm prisma db push && dotenv -e .env.test -- jest --config ./jest-e2e.config.ts && docker compose stop e2e-test-db"
+    "pretest:e2e": "docker compose up e2e-test-db -d && dotenv -e .env.test -- pnpm prisma migrate reset --force",
+    "test:e2e": "dotenv -e .env.test -- jest --runInBand --config ./jest-e2e.config.ts",
+    "posttest:e2e": "docker compose stop e2e-test-db",
+    "pretest:e2e:watch": "docker compose up e2e-test-db -d && dotenv -e .env.test -- pnpm prisma migrate reset --force",
+    "test:e2e:watch": "dotenv -e .env.test -- jest --watch --runInBand --config ./jest-e2e.config.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
