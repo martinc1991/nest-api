@@ -1,39 +1,26 @@
-import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaClient } from '@prisma/client';
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UsersService } from 'src/users/users.service';
-import { AuthService } from './auth.service';
+import { createUserStub } from './stub/create-user.stub';
+import { UsersService } from './users.service';
 
-describe('AuthService', () => {
-  let service: AuthService;
-  let usersService: UsersService;
+describe('UsersService', () => {
+  let service: UsersService;
   let prismaMock: DeepMockProxy<PrismaClient>;
-  let jwtService: JwtService;
-  let cryptoService: CryptoService;
+  let cryptoService: DeepMockProxy<CryptoService>;
 
   beforeEach(async () => {
-    usersService = mockDeep<UsersService>();
     prismaMock = mockDeep<PrismaClient>();
-    jwtService = mockDeep<JwtService>();
     cryptoService = mockDeep<CryptoService>();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        AuthService,
+        UsersService,
         {
           provide: PrismaService,
           useValue: prismaMock,
-        },
-        {
-          provide: JwtService,
-          useValue: jwtService,
-        },
-        {
-          provide: UsersService,
-          useValue: usersService,
         },
         {
           provide: CryptoService,
@@ -42,10 +29,21 @@ describe('AuthService', () => {
       ],
     }).compile();
 
-    service = module.get<AuthService>(AuthService);
+    service = module.get<UsersService>(UsersService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  describe('create method', () => {
+    it('should hash user password', async () => {
+      await service.createUser(createUserStub.email, createUserStub.password);
+
+      expect(cryptoService.hash).toHaveBeenCalledWith(createUserStub.password);
+
+      expect(prismaMock.user.create).not.toHaveBeenCalledWith({
+        data: {
+          email: createUserStub.email,
+          password: createUserStub.password,
+        },
+      });
+    });
   });
 });
